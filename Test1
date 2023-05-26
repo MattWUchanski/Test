@@ -60,13 +60,8 @@ public void AddButtonField(GridView gridView, string commandName)
 
 public void BindDataToGridView(GridView gridView, string queryString, string commandName)
 {
-    // Fetch data from the SQL Server and bind it to the GridView.
+    // Fetch data from the SQL Server.
     DataTable dt = GetData(queryString);
-    gridView.DataSource = dt;
-    gridView.DataBind();
-
-    // Add a ButtonField to the GridView.
-    AddButtonField(gridView, commandName);
 
     // Set AllowPaging to true and set PageSize.
     gridView.AllowPaging = true;
@@ -74,7 +69,27 @@ public void BindDataToGridView(GridView gridView, string queryString, string com
 
     // Add the event handler for PageIndexChanging.
     gridView.PageIndexChanging += new GridViewPageEventHandler(gridView_PageIndexChanging);
+
+    // Set AutoGenerateColumns to false
+    gridView.AutoGenerateColumns = false;
+
+    // Add columns to GridView
+    foreach (DataColumn column in dt.Columns)
+    {
+        BoundField boundField = new BoundField();
+        boundField.DataField = column.ColumnName;
+        boundField.HeaderText = column.ColumnName;
+        gridView.Columns.Add(boundField);
+    }
+
+    // Add a ButtonField to the GridView.
+    AddButtonField(gridView, commandName);
+
+    // Set the DataSource and bind the data to the GridView.
+    gridView.DataSource = dt;
+    gridView.DataBind();
 }
+
 
 void gridView_PageIndexChanging(object sender, GridViewPageEventArgs e)
 {
