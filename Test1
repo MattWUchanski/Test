@@ -1,1 +1,90 @@
-Hello Git!
+
+<asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" />
+<asp:GridView ID="GridView2" runat="server" AutoGenerateColumns="False" />
+
+
+protected void Page_Load(object sender, EventArgs e)
+{
+    if (!IsPostBack)
+    {
+        string queryString1 = "Your SQL Query String for Table 1";
+        string queryString2 = "Your SQL Query String for Table 2";
+        
+        BindDataToGridView(GridView1, queryString1, "Edit");
+        BindDataToGridView(GridView2, queryString2, "Edit");
+    }
+}
+
+public DataTable GetData(string queryString)
+{
+    string connectionString = "Your SQL Server Connection String";
+
+    using (SqlConnection connection = new SqlConnection(connectionString))
+    {
+        SqlCommand command = new SqlCommand(queryString, connection);
+        command.Connection.Open();
+
+        SqlDataAdapter dataAdapter = new SqlDataAdapter(command);
+        DataTable dt = new DataTable();
+        dataAdapter.Fill(dt);
+
+        return dt;
+    }
+}
+
+public void AddButtonField(GridView gridView, string commandName)
+{
+    TemplateField templateField = new TemplateField();
+    templateField.HeaderText = "Action";
+
+    // Define the ItemTemplate and add a LinkButton to it.
+    templateField.ItemTemplate = new CompiledBindableTemplateBuilder(delegate (Control container)
+    {
+        LinkButton linkButton = new LinkButton();
+        linkButton.ID = "LinkButton1";
+        linkButton.CommandName = commandName;
+        linkButton.CommandArgument = '<%# Eval("ID") %>';
+        linkButton.CssClass = "btn btn-primary";
+
+        LiteralControl icon = new LiteralControl();
+        icon.Text = "<i class=\"bi bi-check-circle\"></i>";
+        linkButton.Controls.Add(icon);
+
+        linkButton.Controls.Add(new LiteralControl("Click Me"));
+
+        container.Controls.Add(linkButton);
+    }, null);
+
+    gridView.Columns.Add(templateField);
+}
+
+public void BindDataToGridView(GridView gridView, string queryString, string commandName)
+{
+    // Fetch data from the SQL Server and bind it to the GridView.
+    DataTable dt = GetData(queryString);
+    gridView.DataSource = dt;
+    gridView.DataBind();
+
+    // Add a ButtonField to the GridView.
+    AddButtonField(gridView, commandName);
+
+    // Set AllowPaging to true and set PageSize.
+    gridView.AllowPaging = true;
+    gridView.PageSize = 10; // Set the number of records per page.
+
+    // Add the event handler for PageIndexChanging.
+    gridView.PageIndexChanging += new GridViewPageEventHandler(gridView_PageIndexChanging);
+}
+
+void gridView_PageIndexChanging(object sender, GridViewPageEventArgs e)
+{
+    GridView gridView = sender as GridView;
+    string queryString = "Your SQL Query String";
+
+    // Set the new page index
+    gridView.PageIndex = e.NewPageIndex;
+
+    // Rebind the data
+    BindDataToGridView(gridView, queryString, "Edit");
+}
+
