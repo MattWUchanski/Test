@@ -189,6 +189,24 @@ public void BindDataToGridView(GridView gridView, string queryString, string com
     gridView.DataBind();
 }
 
+void gridView_PageIndexChanging(object sender, GridViewPageEventArgs e)
+{
+    GridView gridView = sender as GridView;
+
+    if (gridView != null && gridViewMap.TryGetValue(gridView, out var pair))
+    {
+        // Set the new page index
+        gridView.PageIndex = e.NewPageIndex;
+
+        // Get the card (grandparent)
+        HtmlGenericControl card = (HtmlGenericControl)gridView.Parent.Parent;
+
+        // Rebind the data
+        BindDataToGridView(gridView, card, pair.queryString, pair.commandName);
+    }
+}
+
+
 
 void gridView_PageIndexChanging(object sender, GridViewPageEventArgs e)
 {
