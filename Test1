@@ -1,4 +1,17 @@
 
+private Dictionary<string, string> GridViewQueries
+{
+    get
+    {
+        return ViewState["GridViewQueries"] as Dictionary<string, string> ?? new Dictionary<string, string>();
+    }
+    set
+    {
+        ViewState["GridViewQueries"] = value;
+    }
+}
+
+
 private Dictionary<GridView, string> gridViewQueries = new Dictionary<GridView, string>();
 
 protected void Page_Load(object sender, EventArgs e)
