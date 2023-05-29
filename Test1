@@ -1,4 +1,40 @@
 
+private Dictionary<GridView, string> gridViewQueries = new Dictionary<GridView, string>();
+
+protected void Page_Load(object sender, EventArgs e)
+{
+    if (!IsPostBack)
+    {
+        string queryString1 = "Your SQL Query String for Table 1";
+        string queryString2 = "Your SQL Query String for Table 2";
+        
+        BindDataToGridView(GridView1, queryString1, "Edit");
+        BindDataToGridView(GridView2, queryString2, "Edit");
+
+        // Add the GridView and query string to the dictionary
+        gridViewQueries[GridView1] = queryString1;
+        gridViewQueries[GridView2] = queryString2;
+    }
+}
+
+void gridView_PageIndexChanging(object sender, GridViewPageEventArgs e)
+{
+    GridView gridView = sender as GridView;
+
+    // Get the query string from the dictionary
+    string queryString = gridViewQueries[gridView];
+
+    // Set the new page index
+    gridView.PageIndex = e.NewPageIndex;
+
+    // Rebind the data
+    BindDataToGridView(gridView, queryString, "Edit");
+}
+
+
+
+
+
 <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" />
 <asp:GridView ID="GridView2" runat="server" AutoGenerateColumns="False" />
 
