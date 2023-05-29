@@ -1,4 +1,32 @@
 
+private Dictionary<GridView, (string queryString, string commandName)> gridViewMap;
+
+protected void Page_Init(object sender, EventArgs e)
+{
+    // Initialize the dictionary
+    gridViewMap = new Dictionary<GridView, (string, string)>
+    {
+        { gridView1, (queryString1, commandName1) },
+        { gridView2, (queryString2, commandName2) }
+        // Add as many gridViews as you have
+    };
+}
+
+protected void Page_Load(object sender, EventArgs e)
+{
+    BindDataToAllGridViews();
+}
+
+private void BindDataToAllGridViews()
+{
+    foreach (var pair in gridViewMap)
+    {
+        BindDataToGridView(pair.Key, pair.Value.queryString, pair.Value.commandName);
+    }
+}
+
+
+
 void gridView_PageIndexChanging(object sender, GridViewPageEventArgs e)
 {
     GridView gridView = sender as GridView;
