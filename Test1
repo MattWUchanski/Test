@@ -1,4 +1,26 @@
 
+void gridView_PageIndexChanging(object sender, GridViewPageEventArgs e)
+{
+    GridView gridView = sender as GridView;
+    string queryString;
+
+    // Use the GridView's ID to get the query string from the dictionary
+    if (gridView != null && GridViewQueries.TryGetValue(gridView.ID, out queryString))
+    {
+        // Set the new page index
+        gridView.PageIndex = e.NewPageIndex;
+
+        // Rebind the data
+        BindDataToGridView(gridView, queryString, "Edit");
+    }
+    else
+    {
+        // Handle the case where the GridView's ID is not in the dictionary
+        // For example, you might log an error or throw an exception
+    }
+}
+
+
 private Dictionary<string, string> GridViewQueries
 {
     get
