@@ -1,6 +1,108 @@
 using System;
 using System.IO;
 using System.Web;
+using System.Web.Services;
+using System.Web.Script.Services;
+using System.Data.SqlClient;
+using System.Collections.Generic;
+using OfficeOpenXml;
+
+public partial class Upload : System.Web.UI.Page
+{
+    [WebMethod]
+    [ScriptMethod(ResponseFormat = ResponseFormat.Json)]
+    public static string UploadFile()
+    {
+        var request = HttpContext.Current.Request;
+        if (request.Files.Count > 0)
+        {
+            HttpFileCollection files = request.Files;
+            for (int i = 0; i < files.Count; i++)
+            {
+                HttpPostedFile file = files[i];
+                string fileName = Path.GetFileName(file.FileName);
+                string path = HttpContext.Current.Server.MapPath("~/Uploads/") + fileName;
+                file.SaveAs(path);
+
+                // Process the Excel file
+                ProcessExcelFile(path, "your-table-name"); // replace "your-table-name" with your actual table name
+            }
+            return "File uploaded successfully";
+        }
+        return "No files received";
+    }
+
+    private static void ProcessExcelFile(string path, string tableType)
+    {
+        using (ExcelPackage package = new ExcelPackage(new FileInfo(path)))
+        {
+            ExcelWorksheet worksheet = package.Workbook.Worksheets[0];
+
+            int rowCount = worksheet.Dimension.Rows;
+            int colCount = worksheet.Dimension.Columns;
+
+            for (int row = 1; row <= rowCount; row++)
+            {
+                List<object> values = new List<object>();
+
+                for (int col = 1; col <= colCount; col++)
+                {
+                    values.Add(worksheet.Cells[row, col].Value);
+                }
+
+                InsertIntoDatabase(values, tableType);
+            }
+        }
+    }
+
+    private static void InsertIntoDatabase(List<object> values, string tableType)
+    {
+        // This is a basic example and doesn't handle potential SQL injection attacks.
+        // You should use parameterized queries or a ORM like Entity Framework to prevent SQL injection.
+
+        // Build the SQL INSERT statement
+        string columns = string.Join(",", Enumerable.Range(1, values.Count).Select(i => $"Column{i}"));
+        string valuesStr = string.Join(",", values.Select(v => $"'{v}'"));
+
+        string sql = $"INSERT INTO {tableType} ({columns}) VALUES ({valuesStr})";
+
+        // Create a connection to the database
+        using (SqlConnection connection = new SqlConnection("your-connection-string"))
+        {
+            connection.Open();
+
+            using (SqlCommand command = new SqlCommand(sql, connection))
+            {
+                command.ExecuteNonQuery();
+            }
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-----------------------------------
+
+using System;
+using System.IO;
+using System.Web;
 using System.Data.SqlClient;
 using System.Collections.Generic;
 using OfficeOpenXml;
