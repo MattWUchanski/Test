@@ -1,0 +1,258 @@
+<div class="wrapper">
+      <header>File Uploader JavaScript</header>
+      <form action="#">
+        <input type="file" class="file-input" hidden>
+        <i class="bi bi-cloud-upload"></i>
+        <p>Browse File to Upload</p>
+      </form>
+      <section class="progress-area">
+      </section>
+      <section class="uploaded-area">
+      </section>     
+</div>
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Roboto', sans-serif;
+}
+
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    background-color: #6990f2;
+}
+
+.wrapper {
+    width: 430px;
+    padding: 30px;
+    background-color: #fff;
+    border-radius: 5px;
+}
+
+.wrapper header {
+    color: #6990f2;
+    font-size: 27px;
+    font-weight: 700;
+    text-align: center;
+}
+
+.wrapper form {
+    height: 167px;
+    display: flex;
+    margin: 30px 0;
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    border-radius: 5px;
+    border: 2px dashed #6990f2;
+}
+
+form :where(i, p) {
+    color: #6990f2;
+}
+
+form i {
+    font-size: 50px;
+    /* margin-bottom: 10px; */
+}
+
+form p {
+    font-size: 16px;
+    margin-top: 15px;
+}
+
+section .row {
+    background-color: #e9f0ff;
+    margin-bottom: 10px;
+    list-style: none;
+    padding: 15px 20px;
+    border-radius: 5px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+section .row i {
+    font-size: 30px;
+    color: #6990f2;
+}
+
+section .details span {
+    font-size: 14px;
+}
+
+.progress-area .row .content {
+    width: 100%;
+    margin-left: 15px;
+}
+
+.progress-area .details {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-direction: column;
+    margin-bottom: 7px;
+}
+
+.progress-area .progress-bar {
+    height: 6px;
+    width: 100%;
+    background-color: #fff;
+    margin-bottom: 4px;
+    border-radius: 30px;
+}
+
+.progress-bar .progress {
+    height: 100%;
+    width: 0%;
+    background-color: #6990f2;
+    border-radius: inherit;
+}
+
+.uploaded-area {
+    max-height: 230px;
+    overflow-y: scroll;
+}
+
+.uploaded-area.onprogress {
+    max-height: 150px;
+}
+
+.uploaded-area::-webkit-scrollbar {
+    width: 0px;
+}
+
+.uploaded-area .row .content {
+    display: flex;
+    align-items: center;
+}
+
+.uploaded-area .row .details {
+    display: flex;
+    margin-left: 15px;
+    flex-direction: column;
+}
+
+.uploaded-area .details .size {
+    font-size: 11px;
+    color: #404040;
+}
+
+.uploaded-area .bi-check-lg {
+    color: #6990f2;
+    font-size: 16px;
+}
+
+const form = document.querySelector("form");
+fileInput = form.querySelector(".file-input");
+progressArea = document.querySelector(".progress-area");
+progressBar = document.querySelector(".progress");
+uploadedArea = document.querySelector(".uploaded-area");
+
+form.addEventListener("click", () => {
+  fileInput.click();
+});
+
+fileInput.onchange = ({ target }) => {
+  let file = target.files[0];
+  if (file) {
+    let fileName = file.name;
+
+    if (fileName.length >= 12) {
+      let splitName = fileName.split(".");
+      fileName = splitName[0].substring(0, 13) + "... ." + splitName[1];
+    }
+    uploadFile(fileName);
+  }
+};
+
+function uploadFile(file) {
+  console.log(file);
+  if (file.size > 1000000) {
+    // file size limit of 1MB
+    alert("File is too large");
+    return;
+  }
+
+  let url = "/upload";
+  let formData = new FormData();
+
+  formData.append("file", file);
+  console.log(formData);
+
+  let xhr = new XMLHttpRequest();
+  xhr.open("POST", url, true);
+
+  // Add a progress event listener
+  xhr.upload.onprogress = function (evt) {
+    // console.log(evt);
+    if (evt.lengthComputable) {
+      let fileLoaded = Math.floor((evt.loaded / evt.total) * 100);
+      //   let fileTotal = Math.floor(evt.total / 1024); // KB
+      let progressHTML = `<li class="row">
+                            <i class="bi bi-file-earmark-code"></i>
+                            <div class="content">
+                            <div class="details">
+                                <span class="name">${file} • Uploading</span>
+                                <span class="percent">${fileLoaded}%</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress" style="width: ${fileLoaded}%"></div>
+                            </div>
+                            </div>
+                        </li>`;
+      uploadedArea.classList.add("onprogress");
+      progressArea.innerHTML = progressHTML;
+      if (evt.loaded === evt.total) {
+        progressArea.innerHTML = "";
+        let uploadedHTML = `<li class="row">
+                            <i class="bi bi-file-earmark-code"></i>
+                            <div class="content">
+                                <div class="details">
+                                <span class="name">${file} • Uploaded</span>
+                                <span class="size">${formatFileSize(
+                                  evt.total
+                                )}</span>
+                                </div>
+                            </div>
+                            <i class="bi bi-check-lg"></i>
+                        </li>`;
+        uploadedArea.insertAdjacentHTML("afterbegin", uploadedHTML);
+      }
+
+      //   uploadedArea.innerHTML = uploadedHTML;
+      // progressBar.style.width = percentComplete + "%";
+      // console.log(percentComplete, fileTotal);
+      // Update your progress bar here
+    }
+  };
+
+  xhr.onload = function () {
+    if (this.status == 200) {
+      let response = this.responseText;
+      // handle success
+    } else {
+      let error = this.statusText;
+      // handle error
+    }
+  };
+
+  xhr.send(formData);
+}
+
+function formatFileSize(bytes) {
+  if (bytes < 1024) {
+    return bytes + " bity/ow";
+  } else if (bytes < 1048576) {
+    return (bytes / 1024).toFixed(1) + " KB";
+  } else if (bytes < 1073741824) {
+    return (bytes / 1048576).toFixed(1) + " MB";
+  } else {
+    return (bytes / 1073741824).toFixed(1) + " GB";
+  }
+}
