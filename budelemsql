@@ -1,0 +1,90 @@
+protected void Page_Load(object sender, EventArgs e)
+{
+    var id = 1;
+    var tableBData = FetchDataFromTableB(id);
+    var elementsData = FetchElementsData();
+
+    CreateAndAddControlsToPlaceHolder(tableBData, elementsData);
+}
+
+private Dictionary<string, object> FetchDataFromTableB(int id)
+{
+    var parameters = new Dictionary<string, object> { { "@ID", id } };
+    var dtAllDataFromTableB = GetDataFromSql("SELECT * FROM S WHERE id =@ID", parameters);
+    return dtAllDataFromTableB.Rows[0].Table.Columns
+        .Cast<DataColumn>()
+        .ToDictionary(col => col.ColumnName, col => dtAllDataFromTableB.Rows[0][col]);
+}
+
+private DataTable FetchElementsData()
+{
+    var parameters = new Dictionary<string, object>();
+    return GetDataFromSql("SELECT * FROM K", parameters);
+}
+
+private void CreateAndAddControlsToPlaceHolder(Dictionary<string, object> tableBData, DataTable elementsData)
+{
+    foreach (DataRow row in elementsData.Rows)
+    {
+        var elementName = row["nazwa_pola"].ToString();
+        var fieldType = row["rodzaj_pola"].ToString();
+        object valueFromTableB;
+        if (tableBData.TryGetValue(elementName, out valueFromTableB))
+        {
+            CreateAndAddControl(fieldType, elementName, valueFromTableB);
+        }
+    }
+}
+
+private void CreateAndAddControl(string fieldType, string elementName, object value)
+{
+    switch (fieldType.ToLower())
+    {
+        case "text":
+            var htmlInput = new HtmlGenericControl("input");
+            htmlInput.Attributes.Add("type", "text");
+            htmlInput.Attributes.Add("class", "form-control");
+            htmlInput.Attributes.Add("id", elementName);
+            htmlInput.Attributes.Add("value", value.ToString());
+            htmlInput.Attributes.Add("placeholder", "Enter value");
+
+            var htmlLabel = new HtmlGenericControl("label");
+            htmlLabel.Attributes.Add("for", elementName);
+            htmlLabel.InnerText = "Enter " + elementName;
+
+            var htmlDiv = new HtmlGenericControl("div");
+            htmlDiv.Attributes.Add("class", "form-floating mb-3");
+            htmlDiv.Controls.Add(htmlInput);
+            htmlDiv.Controls.Add(htmlLabel);
+
+            PlaceHolder1.Controls.Add(htmlDiv);
+            break;
+        // Commenting out other cases as per your instruction
+        // case "dropdown":
+        // case "textarea":
+        default:
+            break;
+    }
+}
+
+
+protected static DataTable GetDataFromSql(string query, Dictionary<string, object> parameters)
+{
+    string connectionString = ""; // Add your connection string here
+    var table = new DataTable();
+    using (var connection = new SqlConnection(connectionString))
+    {
+        using (var command = new SqlCommand(query, connection))
+        {
+            foreach (var param in parameters)
+            {
+                command.Parameters.AddWithValue(param.Key, param.Value);
+            }
+
+            connection.Open();
+            var adapter = new SqlDataAdapter(command);
+            adapter.Fill(table);
+        }
+    }
+    return table;
+}
