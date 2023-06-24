@@ -1,3 +1,67 @@
+
+public void CreateBootstrapTextArea(string id, string value, string labelText, Dictionary<string, string> attributes)
+{
+    // Create the textarea control
+    var textArea = new HtmlTextArea
+    {
+        ID = id,
+        Value = value
+    };
+    AddAttributes(textArea, attributes);
+
+    // Create the label
+    var label = new HtmlGenericControl("label")
+    {
+        InnerText = labelText
+    };
+    label.Attributes.Add("for", id);
+
+    // Create the wrapper div
+    var div = new HtmlGenericControl("div");
+    div.Attributes.Add("class", "form-floating");
+
+    // Add textarea and label to the div
+    div.Controls.Add(textArea);
+    div.Controls.Add(label);
+
+    // Add the div to the placeholder
+    placeholder.Controls.Add(div);
+}
+
+private void AddAttributes(HtmlControl control, Dictionary<string, string> attributes)
+{
+    foreach (var attribute in attributes)
+    {
+        control.Attributes.Add(attribute.Key, attribute.Value);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 protected void Page_Load(object sender, EventArgs e)
 {
     var id = 1;
