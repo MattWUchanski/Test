@@ -1,3 +1,15 @@
+public SqlDbType ConvertToSqlDbType(Type type)
+{
+    if (type == typeof(int)) return SqlDbType.Int;
+    else if (type == typeof(string)) return SqlDbType.VarChar;
+    else if (type == typeof(DateTime)) return SqlDbType.DateTime;
+    // Add more type conversions as needed
+
+    throw new ArgumentException($"Unsupported type: {type.FullName}");
+}
+
+
+
 public void CallStoredProcedure(string connectionString, string spName, Dictionary<string, DataTable> dtParams, Dictionary<string, string> tableTypes, Dictionary<string, object> otherParameters)
 {
     using (SqlConnection sqlConn = new SqlConnection(connectionString))
