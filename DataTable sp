@@ -1,3 +1,84 @@
+public void CallStoredProcedure(string connectionString, string spName, Dictionary<string, DataTable> dtParams, Dictionary<string, string> tableTypes, Dictionary<string, object> otherParameters)
+{
+    using (SqlConnection sqlConn = new SqlConnection(connectionString))
+    {
+        using (SqlCommand cmd = new SqlCommand(spName, sqlConn))
+        {
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            // Add DataTable parameters
+            foreach (var dtParam in dtParams)
+            {
+                string tableTypeName;
+                if (tableTypes.TryGetValue(dtParam.Key, out tableTypeName))
+                {
+                    SqlParameter param = new SqlParameter(dtParam.Key, SqlDbType.Structured)
+                    {
+                        TypeName = tableTypeName,
+                        Value = dtParam.Value
+                    };
+                    cmd.Parameters.Add(param);
+                }
+                else
+                {
+                    throw new ArgumentException($"No table type provided for DataTable parameter {dtParam.Key}");
+                }
+            }
+
+            // Add other parameters
+            foreach (var param in otherParameters)
+            {
+                cmd.Parameters.AddWithValue(param.Key, param.Value);
+            }
+
+            sqlConn.Open();
+            cmd.ExecuteNonQuery();
+        }
+    }
+}
+
+protected void YourButton_Click(object sender, EventArgs e)
+{
+    DataTable dt1 = GetParametersFromHiddenFields();
+    // Generate more DataTables as needed
+    // DataTable dt2 = ...
+
+    Dictionary<string, DataTable> dtParams = new Dictionary<string, DataTable>
+    {
+        { "@YourTableParam1", dt1 },
+        // Add more DataTable parameters as needed
+        // { "@YourTableParam2", dt2 },
+    };
+
+    Dictionary<string, string> tableTypes = new Dictionary<string, string>
+    {
+        { "@YourTableParam1", "dbo.YourUserDefinedTableType1" },
+        // Add more table types as needed
+        // { "@YourTableParam2", "dbo.YourUserDefinedTableType2" },
+    };
+
+    Dictionary<string, object> otherParameters = new Dictionary<string, object>
+    {
+        { "@Param1", "SomeString" },
+        { "@Param2", 123 }
+        // Add more parameters as needed
+    };
+
+    string connectionString = ConfigurationManager.ConnectionStrings["YourConnectionString"].ConnectionString;
+    string spName = "YourStoredProcedure";
+
+    CallStoredProcedure(connectionString, spName, dtParams, tableTypes, otherParameters);
+}
+
+
+
+
+
+
+
+
+
+
 private DataTable GetParametersFromHiddenFields()
 {
     // Initialize the DataTable
