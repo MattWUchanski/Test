@@ -1,0 +1,74 @@
+private DataTable GetParametersFromHiddenFields()
+{
+    // Initialize the DataTable
+    DataTable dt = new DataTable();
+
+    // Define the hidden field IDs and their corresponding types
+    Dictionary<string, Type> hiddenFieldDict = new Dictionary<string, Type>
+    {
+        { "hiddenField1", typeof(int) },
+        { "hiddenField2", typeof(string) },
+        // add more hidden field IDs and their types
+    };
+
+    AddColumnsToDataTable(dt, hiddenFieldDict);
+
+    // Add all specified hidden fields to one DataRow
+    DataRow row = dt.NewRow();
+    foreach (var hiddenFieldEntry in hiddenFieldDict)
+    {
+        Control hiddenField = FindHiddenField(this, hiddenFieldEntry.Key);
+        SetRowValueFromHiddenField(row, hiddenField, hiddenFieldEntry.Value);
+    }
+    dt.Rows.Add(row);
+
+    return dt;
+}
+
+private void AddColumnsToDataTable(DataTable dt, Dictionary<string, Type> hiddenFieldDict)
+{
+    // Add a column for each hidden field ID
+    foreach (KeyValuePair<string, Type> hiddenFieldEntry in hiddenFieldDict)
+    {
+        // Replace "hf_" with an empty string in column name
+        string columnName = hiddenFieldEntry.Key.Replace("hf_", "");
+        dt.Columns.Add(columnName, hiddenFieldEntry.Value);
+    }
+}
+
+
+private void SetRowValueFromHiddenField(DataRow row, Control hiddenField, Type type)
+{
+    string paramName = hiddenField != null ? hiddenField.ID : null;
+    object value = GetHiddenFieldValue(hiddenField, type);
+    row[paramName] = value;
+}
+
+private object GetHiddenFieldValue(Control hiddenField, Type type)
+{
+    // If the hidden field is null or does not exist, return null
+    if (hiddenField == null)
+    {
+        return null;
+    }
+    
+    // Convert the value to the specified type
+    string value = (hiddenField as HiddenField).Value;
+    if (type == typeof(int))
+    {
+        return int.Parse(value);
+    }
+    else if (type == typeof(decimal))
+    {
+        return decimal.Parse(value);
+    }
+    else if (type == typeof(bool))
+    {
+        return bool.Parse(value);
+    }
+    // add more types as necessary
+    else
+    {
+        return value;
+    }
+}
