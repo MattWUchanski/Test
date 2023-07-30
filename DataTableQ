@@ -1,3 +1,23 @@
+
+private IEnumerable<HiddenField> GetAllHiddenFields()
+{
+    ContentPlaceHolder cph = (ContentPlaceHolder)this.Master.FindControl("ContentPlaceHolder1");
+    
+    var hiddenFields = new List<HiddenField>();
+    
+    foreach (Control control in cph.Controls)
+    {
+        if (control is HiddenField hiddenField &&
+            (hiddenField.ID.Contains("hf_odpowiedz") || hiddenField.ID.Contains("hf_opisBledu")))
+        {
+            hiddenFields.Add(hiddenField);
+        }
+    }
+    
+    return hiddenFields;
+}
+
+
 private DataTable GetParameters()
 {
     // Initialize the DataTable
