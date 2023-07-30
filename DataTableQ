@@ -1,0 +1,49 @@
+private DataTable GetParameters()
+{
+    // Initialize the DataTable
+    DataTable dt = new DataTable();
+    dt.Columns.Add("ControlId", typeof(int));
+    dt.Columns.Add("QuestionId", typeof(int));
+    dt.Columns.Add("Result", typeof(string));
+    dt.Columns.Add("Comment", typeof(string));
+
+    // Find all hidden fields in the placeholder control.
+    var hiddenFields = GetAllHiddenFields(PlaceHolder2);
+
+    // Group the hidden fields by questionId.
+    var groupedHiddenFields = hiddenFields.GroupBy(hf => hf.ID.Split('_').Last());
+
+    foreach (var group in groupedHiddenFields)
+    {
+        DataRow row = dt.NewRow();
+        string questionId = group.Key;
+
+        foreach (var hiddenField in group)
+        {
+            string paramName = hiddenField.ID.Split('_').First(); // This will be either "hf_odpowiedz" or "hf_opisBledu".
+            SqlDbType paramType = SqlDbType.VarChar; // Adjust this based on your requirements.
+
+            object value = GetHiddenFieldValue(hiddenField, paramType);
+
+            if (paramName == "hf_odpowiedz")
+            {
+                row["Result"] = value;
+            }
+            else if (paramName == "hf_opisBledu")
+            {
+                row["Comment"] = value;
+            }
+        }
+
+        // Add the questionId parameter.
+        row["QuestionId"] = int.Parse(questionId);
+
+        // Add the "control id" parameter from URL.
+        string controlIdFromUrl = Request.QueryString["controlId"]; // Assuming you get the "controlId" from URL.
+        row["ControlId"] = int.Parse(controlIdFromUrl);
+
+        dt.Rows.Add(row);
+    }
+
+    return dt;
+}
