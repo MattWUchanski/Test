@@ -1,4 +1,34 @@
 
+private List<HiddenField> FindAllHiddenFields()
+{
+    List<HiddenField> hiddenFields = new List<HiddenField>();
+    ContentPlaceHolder cph = (ContentPlaceHolder)this.Master.FindControl("ContentPlaceHolder1");
+
+    if (cph != null)
+    {
+        FindHiddenFieldsRecursive(cph, hiddenFields);
+    }
+
+    return hiddenFields;
+}
+
+private void FindHiddenFieldsRecursive(Control control, List<HiddenField> list)
+{
+    foreach (Control childControl in control.Controls)
+    {
+        if (childControl is HiddenField hiddenField)
+        {
+            list.Add(hiddenField);
+        }
+        else
+        {
+            FindHiddenFieldsRecursive(childControl, list);
+        }
+    }
+}
+
+
+
 private IEnumerable<HiddenField> GetAllHiddenFields()
 {
     ContentPlaceHolder cph = (ContentPlaceHolder)this.Master.FindControl("ContentPlaceHolder1");
