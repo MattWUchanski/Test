@@ -1,51 +1,22 @@
-
-private List<HiddenField> FindAllHiddenFields()
+private IEnumerable<HiddenField> GetAllHiddenFields(List<PlaceHolder> myList)
 {
-    List<HiddenField> hiddenFields = new List<HiddenField>();
-    ContentPlaceHolder cph = (ContentPlaceHolder)this.Master.FindControl("ContentPlaceHolder1");
-
-    if (cph != null)
-    {
-        FindHiddenFieldsRecursive(cph, hiddenFields);
-    }
-
-    return hiddenFields;
-}
-
-private void FindHiddenFieldsRecursive(Control control, List<HiddenField> list)
-{
-    foreach (Control childControl in control.Controls)
-    {
-        if (childControl is HiddenField hiddenField)
-        {
-            list.Add(hiddenField);
-        }
-        else
-        {
-            FindHiddenFieldsRecursive(childControl, list);
-        }
-    }
-}
-
-
-
-private IEnumerable<HiddenField> GetAllHiddenFields()
-{
-    ContentPlaceHolder cph = (ContentPlaceHolder)this.Master.FindControl("ContentPlaceHolder1");
-    
     var hiddenFields = new List<HiddenField>();
     
-    foreach (Control control in cph.Controls)
+    foreach (PlaceHolder placeholder in myList)
     {
-        if (control is HiddenField hiddenField &&
-            (hiddenField.ID.Contains("hf_odpowiedz") || hiddenField.ID.Contains("hf_opisBledu")))
+        foreach (Control control in placeholder.Controls)
         {
-            hiddenFields.Add(hiddenField);
+            if (control is HiddenField hiddenField &&
+                (hiddenField.ID.Contains("hf_odpowiedz") || hiddenField.ID.Contains("hf_opisBledu")))
+            {
+                hiddenFields.Add(hiddenField);
+            }
         }
     }
     
     return hiddenFields;
 }
+
 
 
 private DataTable GetParameters()
