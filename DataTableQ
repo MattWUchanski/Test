@@ -1,3 +1,79 @@
+
+
+private DataTable GetParameters()
+{
+    // Initialize the DataTable
+    DataTable dt = new DataTable();
+    dt.Columns.Add("ControlId", typeof(int));
+    dt.Columns.Add("QuestionId", typeof(int));
+    dt.Columns.Add("Result", typeof(string));
+    dt.Columns.Add("Comment", typeof(string));
+
+    // Manually specify the hidden field ids
+    List<string> hiddenFieldIds = new List<string>()
+    {
+        "hf_odpowiedz_1", "hf_opisBledu_1",
+        "hf_odpowiedz_2",
+        "hf_odpowiedz_3", "hf_opisBledu_3",
+        "hf_odpowiedz_4",
+        "hf_odpowiedz_5", "hf_opisBledu_5"
+    };
+
+    // Use FindHiddenField method to get all hidden fields
+    List<HiddenField> hiddenFields = hiddenFieldIds
+        .Select(id => FindHiddenField(id))
+        .Where(hf => hf != null) // Exclude any nulls resulting from failed finds
+        .ToList();
+
+    // Group the hidden fields by questionId.
+    var groupedHiddenFields = hiddenFields.GroupBy(hf => hf.ID.Split('_').Last());
+
+    foreach (var group in groupedHiddenFields)
+    {
+        DataRow row = dt.NewRow();
+        string questionId = group.Key;
+
+        foreach (var hiddenField in group)
+        {
+            string paramName = hiddenField.ID.Split('_').First(); // This will be either "hf_odpowiedz" or "hf_opisBledu".
+            object value = hiddenField.Value;
+
+            if (paramName == "hf_odpowiedz")
+            {
+                row["Result"] = value;
+            }
+            else if (paramName == "hf_opisBledu")
+            {
+                row["Comment"] = value;
+            }
+        }
+
+        // Add the questionId parameter.
+        row["QuestionId"] = int.Parse(questionId);
+
+        // Add the "control id" parameter from URL.
+        string controlIdFromUrl = Request.QueryString["controlId"]; // Assuming you get the "controlId" from URL.
+        row["ControlId"] = int.Parse(controlIdFromUrl);
+
+        dt.Rows.Add(row);
+    }
+
+    return dt;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 private IEnumerable<HiddenField> GetAllHiddenFields(List<PlaceHolder> myList)
 {
     var hiddenFields = new List<HiddenField>();
