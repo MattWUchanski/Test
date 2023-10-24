@@ -1,0 +1,113 @@
+protected void BuildQuestionsStructure()
+{
+    string cardId = ViewState["IdKarty"].ToString();
+    string controlId = ViewState["IdKontroli"].ToString();
+    string mode = ViewState["Tryb"].ToString();
+    bool isEditMode = mode == "1";
+
+    DataTable questionsTable = DataTableStore.GetQuestions(cardId, controlId, mode);
+    List<Question> questions = GetMappedRows<Question>(
+        questionsTable,
+        null,
+        delegate(DataRow row) { return new Question(row); }
+    );
+
+    HtmlGenericControl questionsDiv = new HtmlGenericControl("div");
+    
+    foreach (Question question in questions)
+    {
+        questionsDiv.Controls.Add(BuildQuestionDiv(question, isEditMode));
+    }
+
+    PlaceHolder4.Controls.Add(questionsDiv);
+}
+
+private HtmlGenericControl BuildQuestionDiv(Question question, bool isEditMode)
+{
+    var questionDiv = new HtmlGenericControl("div");
+    questionDiv.Controls.Add(BuildCategoryParagraph(question));
+
+    if (question.FlNotatka)
+    {
+        string noteContent = question.Notatka != null ? question.Notatka : string.Empty;
+        AddHiddenFieldToParent("hf_opisBledu_" + question.IdPytania, noteContent, PlaceHolder4);
+    }
+
+    var radioButtonsDiv = BuildRadioButtonsDiv(question, isEditMode);
+    questionDiv.Controls.Add(radioButtonsDiv);
+
+    if (IsQuestionDisabled(question, isEditMode))
+    {
+        AddHiddenFieldToParent("hf_odpowiedz_" + question.IdPytania, question.Wynik.ToString(), PlaceHolder4);
+    }
+
+    return questionDiv;
+}
+
+private HtmlGenericControl BuildCategoryParagraph(Question question)
+{
+    var pCategory = new HtmlGenericControl("p");
+    var spanNumber = new HtmlGenericControl("span");
+    var icon = new HtmlGenericControl("i");
+    var spanName = new HtmlGenericControl("span");
+    spanName.InnerHtml = question.NazwaPytania;
+
+    if (!question.FlHistorycznePytanie)
+    {
+        spanNumber.InnerHtml = question.KolejnoscPola.ToString();
+        icon.Attributes.Add("class", "bi bi-bookmark mr-2");
+        spanName.Attributes.Add("class", "user-select-all");
+    }
+    else
+    {
+        spanNumber.InnerHtml = "[Nieaktywne] ";
+        spanNumber.Attributes.Add("class", "bolded-text user-select-none text-danger");
+        icon.Attributes.Add("class", "bi bi-x-octagon-fill mr-2 text-danger");
+    }
+
+    pCategory.Controls.Add(icon);
+    pCategory.Controls.Add(spanNumber);
+    pCategory.Controls.Add(spanName);
+
+    return pCategory;
+}
+private HtmlGenericControl BuildRadioButtonsDiv(Question question, bool isEditMode)
+{
+    var radioButtonsDiv = new HtmlGenericControl("div");
+    radioButtonsDiv.Attributes.Add("class", "ml-3 mb-2");
+
+    bool isDisabled = IsQuestionDisabled(question, isEditMode);
+
+    radioButtonsDiv.InnerHtml = CreateRadioButtonHtml(question, "success", isDisabled) + 
+                                CreateRadioButtonHtml(question, "danger", isDisabled);
+
+    if (question.FlNotatka && isDisabled)
+    {
+        bool isMistake = question.Wynik == 1;
+        ElementFactory.CreateStandardTextArea(question.IdPytania.ToString(), question.Notatka, radioButtonsDiv, question.Wynik == 1, ElementFactory.attributesStandardTextArea(question.IdPytania.ToString(), true, isMistake));
+    }
+
+    return radioButtonsDiv;
+}
+
+private string CreateRadioButtonHtml(Question question, string type, bool isDisabled)
+{
+    int resultValue = type == "success" ? 0 : 1;
+    string functionName = type == "success" ? "ukryj_notatke" : "pokaz_notatke";
+    string className = type == "success" ? "btn-outline-success btn-sm mr-2" : "btn-outline-danger btn-sm";
+    string labelText = type == "success" ? "Brak błędu" : "Błąd";
+
+    bool isChecked = question.Wynik == resultValue;
+    bool isRadioButtonVisible = isDisabled ? question.Wynik == resultValue : true;
+
+    if (!isRadioButtonVisible) return string.Empty;
+
+    return AddRadioButtonWithLabel("btn-check", "RBname_" + question.IdPytania, "RB_" + type.ToUpper() + "_" + question.IdPytania, isChecked, isDisabled, className, labelText, new List<string> { "insertHfValue(" + question.IdPytania + "," + resultValue + ")", functionName });
+}
+
+private bool IsQuestionDisabled(Question question, bool isEditMode)
+{
+    return !isEditMode || question.FlHistorycznePytanie;
+}
+
+// ... rest of your methods remain unchanged
