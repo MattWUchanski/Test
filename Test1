@@ -1,4 +1,72 @@
+// v2
+public static List<TOutput> GetMappedRows<TOutput>(
+    DataTable table,
+    Func<DataRow, bool> filterFunc,
+    Func<DataRow, TOutput> mapper,
+    int? questionId = null) // Optional parameter to filter by QuestionId
+    where TOutput : class
+{
+    List<TOutput> outputList = new List<TOutput>();
+    
+    foreach (DataRow row in table.AsEnumerable())
+    {
+        // If a questionId is provided, use it to filter the DataRow
+        if (questionId.HasValue && row.Field<int>("IdPytania") != questionId.Value)
+            continue;
 
+        if (filterFunc == null || filterFunc(row))
+        {
+            outputList.Add(mapper(row));
+        }
+    }
+    
+    return outputList;
+}
+
+if (question.checkbox)
+{
+    // Fetch and map the mistakes related to the specific question
+    DataTable mistakesTable = DataTableStore.GetMistakes(); // Assume this fetches all mistakes
+    List<Mistake> mistakesForQuestion = GetMappedRows<Mistake>(
+        mistakesTable,
+        null,
+        row => new Mistake(row),
+        question.IdPytania
+    );
+
+    // Update the 'Mistakes' list of the 'Question' object
+    question.Mistakes = mistakesForQuestion;
+
+    var checkboxesDiv = BuildCheckboxesDiv(question);
+    questionDiv.Controls.Add(checkboxesDiv);
+}
+
+private HtmlGenericControl BuildCheckboxesDiv(Question question)
+{
+    var checkboxesDiv = new HtmlGenericControl("div");
+    checkboxesDiv.Attributes.Add("class", "form-check");
+
+    foreach (var mistake in question.Mistakes)
+    {
+        // Create each checkbox and label based on the mistake details
+        var checkbox = new HtmlInputCheckBox();
+        checkbox.Attributes.Add("class", "form-check-input");
+        checkbox.Value = mistake.IdBledu.ToString();
+
+        var label = new HtmlGenericControl("label");
+        label.Attributes.Add("class", "form-check-label");
+        label.Attributes.Add("for", checkbox.ClientID);
+        label.InnerText = mistake.NazwaBledu;
+
+        checkboxesDiv.Controls.Add(checkbox);
+        checkboxesDiv.Controls.Add(label);
+    }
+
+    return checkboxesDiv;
+}
+
+
+// v1
 private Dictionary<GridView, (string queryString, string commandName)> gridViewMap;
 
 protected void Page_Init(object sender, EventArgs e)
