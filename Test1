@@ -1,3 +1,132 @@
+// v5
+
+public class PanelManager
+{
+    private List<PanelTag> panelTags;
+    private List<PanelConfiguration> configurations;
+
+    public PanelManager(List<Panel> panels)
+    {
+        InitializePanelTags(panels);
+        InitializeConfigurations();
+    }
+
+    private void InitializePanelTags(List<Panel> panels)
+    {
+        panelTags = new List<PanelTag>
+        {
+            new PanelTag
+            {
+                TagName = "CommonAdmin",
+                Panels = new List<Panel> { panels[0], panels[1] } 
+            },
+            //... other tags as needed
+        };
+    }
+
+    private void InitializeConfigurations()
+    {
+        configurations = new List<PanelConfiguration>();
+
+        var allAccessLevels = new List<string> { "Admin", "User" }; // Add other access levels as needed
+        var allModes = new List<string> { "Mode1", "Mode2" };       // Add other modes as needed
+        var allCategories = new List<string> { "Category1", "Category2" }; // Add other categories as needed
+
+        foreach (var accessLevel in allAccessLevels)
+        {
+            foreach (var mode in allModes)
+            {
+                foreach (var category in allCategories)
+                {
+                    configurations.Add(new PanelConfiguration
+                    {
+                        AccessLevel = accessLevel,
+                        Mode = mode,
+                        Category = category,
+                        PanelTags = DeterminePanelTags(accessLevel, mode, category)
+                    });
+                }
+            }
+        }
+    }
+
+    private List<string> DeterminePanelTags(string accessLevel, string mode, string category)
+    {
+        var tags = new List<string>();
+
+        // Simple rules
+        if (accessLevel == "Admin")
+        {
+            tags.Add("CommonAdmin");
+        }
+
+        // Add additional rules as needed, for example:
+        // if (mode == "Mode1" && category == "Category2") { tags.Add("SomeTag"); }
+
+        return tags;
+    }
+
+    public void RenderPanels(string accessLevel, string mode, string category)
+    {
+        var config = configurations.FirstOrDefault(c => 
+            c.AccessLevel == accessLevel && 
+            c.Mode == mode && 
+            c.Category == category);
+
+        if (config != null)
+        {
+            var panelsToRender = config.PanelTags
+                .SelectMany(tagName => 
+                {
+                    var tag = panelTags.FirstOrDefault(t => t.TagName == tagName);
+                    return tag != null ? tag.Panels : new List<Panel>();
+                })
+                .Distinct();
+
+            foreach (var panel in panelsToRender)
+            {
+                panel.Visible = true;
+            }
+        }
+    }
+}
+
+public partial class YourWebForm : System.Web.UI.Page
+{
+    private PanelManager panelManager;
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        List<Panel> panels = new List<Panel> { Panel1, Panel2, /*... other panels ...*/ };
+        panelManager = new PanelManager(panels);
+
+        string currentAccessLevel = GetCurrentAccessLevel();
+        string currentMode = GetCurrentMode();
+        string currentCategory = GetCurrentCategory();
+
+        panelManager.RenderPanels(currentAccessLevel, currentMode, currentCategory);
+    }
+
+    private string GetCurrentAccessLevel()
+    {
+        // Implement your logic to get the current access level.
+        return "Admin"; // Example value, replace with your logic
+    }
+
+    private string GetCurrentMode()
+    {
+        // Implement your logic to get the current mode.
+        return "Mode1"; // Example value, replace with your logic
+    }
+
+    private string GetCurrentCategory()
+    {
+        // Implement your logic to get the current category.
+        return "Category1"; // Example value, replace with your logic
+    }
+}
+
+
 // v4 
 
 var panelsToRender = config.PanelTags
