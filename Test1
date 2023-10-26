@@ -1,3 +1,14 @@
+// v4 
+
+var panelsToRender = config.PanelTags
+    .SelectMany(tagName => 
+    {
+        var tag = panelTags.FirstOrDefault(t => t.TagName == tagName);
+        return tag != null ? tag.Panels : new List<Panel>();
+    })
+    .Distinct();
+
+
 // v3
 
 public class PanelManager
