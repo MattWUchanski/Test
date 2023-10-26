@@ -1,3 +1,101 @@
+// v3
+
+public class PanelManager
+{
+    private List<PanelTag> panelTags;
+    private List<PanelConfiguration> configurations;
+
+    public PanelManager()
+    {
+        InitializePanelTags();
+        InitializeConfigurations();
+    }
+
+    private void InitializePanelTags()
+    {
+        panelTags = new List<PanelTag>
+        {
+            new PanelTag
+            {
+                TagName = "CommonAdmin",
+                Panels = new List<Panel> { /* Initialize panels here */ }
+            },
+            //... other tags
+        };
+    }
+
+    private void InitializeConfigurations()
+    {
+        configurations = new List<PanelConfiguration>
+        {
+            new PanelConfiguration
+            {
+                AccessLevel = "Admin",
+                Mode = "Mode1",
+                Category = "Category1",
+                PanelTags = new List<string> { "CommonAdmin" }
+            },
+            // ... other configurations
+        };
+    }
+
+    public void RenderPanels(string accessLevel, string mode, string category)
+    {
+        var config = configurations.FirstOrDefault(c => 
+            c.AccessLevel == accessLevel && 
+            c.Mode == mode && 
+            c.Category == category);
+
+        if (config != null)
+        {
+            var panelsToRender = config.PanelTags
+                .SelectMany(tagName => panelTags.FirstOrDefault(t => t.TagName == tagName)?.Panels ?? new List<Panel>())
+                .Distinct();
+
+            foreach (var panel in panelsToRender)
+            {
+                panel.Visible = true;
+            }
+        }
+    }
+}
+
+public partial class YourWebForm : System.Web.UI.Page
+{
+    private PanelManager panelManager;
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        panelManager = new PanelManager();
+        
+        // These methods are just placeholders. Replace them with your actual logic to get access level, mode, and category.
+        string currentAccessLevel = GetCurrentAccessLevel();
+        string currentMode = GetCurrentMode();
+        string currentCategory = GetCurrentCategory();
+        
+        panelManager.RenderPanels(currentAccessLevel, currentMode, currentCategory);
+    }
+
+    private string GetCurrentAccessLevel()
+    {
+        // Implement your logic to get the current access level.
+        return "SomeAccessLevel";
+    }
+
+    private string GetCurrentMode()
+    {
+        // Implement your logic to get the current mode.
+        return "SomeMode";
+    }
+
+    private string GetCurrentCategory()
+    {
+        // Implement your logic to get the current category.
+        return "SomeCategory";
+    }
+}
+
+
 // v2
 public static List<TOutput> GetMappedRows<TOutput>(
     DataTable table,
