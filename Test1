@@ -1,3 +1,138 @@
+// v6
+
+using System.Collections.Generic;
+using System.Linq;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+
+public class ControlManager<T> where T : Control
+{
+    private List<ControlTag<T>> controlTags;
+    private List<ControlConfiguration> configurations;
+
+    public ControlManager(List<T> controls)
+    {
+        InitializeControlTags(controls);
+        InitializeConfigurations();
+    }
+
+    private void InitializeControlTags(List<T> controls)
+    {
+        controlTags = new List<ControlTag<T>>
+        {
+            new ControlTag<T>
+            {
+                TagName = "CommonAdminControls",
+                Controls = new List<T> { controls[0], controls[1] } 
+            },
+            //... other tags as needed
+        };
+    }
+
+    private void InitializeConfigurations()
+    {
+        configurations = new List<ControlConfiguration>();
+
+        var allAccessLevels = new List<string> { "Admin", "User" };
+        var allModes = new List<string> { "Mode1", "Mode2" };
+        var allCategories = new List<string> { "Category1", "Category2" };
+
+        foreach (var accessLevel in allAccessLevels)
+        {
+            foreach (var mode in allModes)
+            {
+                foreach (var category in allCategories)
+                {
+                    configurations.Add(new ControlConfiguration
+                    {
+                        AccessLevel = accessLevel,
+                        Mode = mode,
+                        Category = category,
+                        ControlTags = DetermineControlTags(accessLevel, mode, category)
+                    });
+                }
+            }
+        }
+    }
+
+    private List<string> DetermineControlTags(string accessLevel, string mode, string category)
+    {
+        var tags = new List<string>();
+
+        if (accessLevel == "Admin")
+        {
+            tags.Add("CommonAdminControls");
+        }
+
+        // Add additional rules as needed
+
+        return tags;
+    }
+
+    public void RenderControls(string accessLevel, string mode, string category)
+    {
+        var config = configurations.FirstOrDefault(c => 
+            c.AccessLevel == accessLevel && 
+            c.Mode == mode && 
+            c.Category == category);
+
+        if (config != null)
+        {
+            var controlsToRender = config.ControlTags
+                .SelectMany(tagName => 
+                {
+                    var tag = controlTags.FirstOrDefault(t => t.TagName == tagName);
+                    return tag != null ? tag.Controls : new List<T>();
+                })
+                .Distinct();
+
+            foreach (var control in controlsToRender)
+            {
+                control.Visible = true;
+            }
+        }
+    }
+}
+
+public class ControlTag<T> where T : Control
+{
+    public string TagName { get; set; }
+    public List<T> Controls { get; set; }
+}
+
+public class ControlConfiguration
+{
+    public string AccessLevel { get; set; }
+    public string Mode { get; set; }
+    public string Category { get; set; }
+    public List<string> ControlTags { get; set; }
+}
+
+public partial class YourWebForm : System.Web.UI.Page
+{
+    private ControlManager<Panel> panelManager;
+    private ControlManager<Button> buttonManager;
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        List<Panel> panels = new List<Panel> { Panel1, Panel2, /*... other panels ...*/ };
+        panelManager = new ControlManager<Panel>(panels);
+
+        List<Button> buttons = new List<Button> { Button1, Button2, /*... other buttons ...*/ };
+        buttonManager = new ControlManager<Button>(buttons);
+
+        string currentAccessLevel = GetCurrentAccessLevel();
+        string currentMode = GetCurrentMode();
+        string currentCategory = GetCurrentCategory();
+
+        panelManager.RenderControls(currentAccessLevel, currentMode, currentCategory);
+        buttonManager.RenderControls(currentAccessLevel, currentMode, currentCategory);
+    }
+
+    // Your methods for GetCurrentAccessLevel, GetCurrentMode, and GetCurrentCategory remain the same.
+}
+
+
 // v5
 
 public class PanelManager
