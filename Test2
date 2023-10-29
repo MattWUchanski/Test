@@ -1,0 +1,98 @@
+// Constants and Mappings
+const DIV_DISPLAY_STATES = {
+    'none': {
+        divSearch: 'none',
+        divFilters: 'none',
+        divResultSearch: 'none',
+        divResultFilters: 'none'
+    },
+    '0': {
+        divSearch: 'none',
+        divFilters: 'block',
+        divResultSearch: 'none',
+        divResultFilters: 'block'
+    },
+    '1': {
+        divSearch: 'block',
+        divFilters: 'none',
+        divResultSearch: 'block',
+        divResultFilters: 'none'
+    }
+};
+
+const CATEGORY_MAP = {
+    '1': 'SMSMS',
+    '2': 'Rozmowy',
+    '3': 'Maile',
+    '4': 'Notatki',
+    '5': 'Dokumenty',
+    '6': 'Dialy'
+};
+
+// Utilities
+const setDisplayState = (stateKey) => {
+    const state = DIV_DISPLAY_STATES[stateKey];
+    if (state) {
+        divSearch.style.display = state.divSearch;
+        divFilters.style.display = state.divFilters;
+        divResultSearch.style.display = state.divResultSearch;
+        divResultFilters.style.display = state.divResultFilters;
+    }
+};
+
+const hideAllFields = () => {
+    const allSearchFields = document.querySelectorAll("[id^='searchInput-']");
+    allSearchFields.forEach(field => field.style.display = "none");
+};
+
+const showFieldsByCategory = (category) => {
+    const toShow = document.querySelectorAll(`[id^="searchInput-${category}"]`);
+    toShow.forEach(fieldBlock => fieldBlock.style.display = "block");
+};
+
+const setAdditionalSearchEngineDisplay = (value) => {
+    divAdditionalSearchEngine.style.display = value !== "%%" && value !== "0" && value !== "" ? 'block' : 'none';
+};
+
+// Event Listeners
+radioFilter.addEventListener("click", () => {
+    hfFilterSearchType.value = "0";
+    hfDivTableResultType.value = "0";
+    setDisplayState('0');
+});
+
+radioSearch.addEventListener("click", () => {
+    hfFilterSearchType.value = "1";
+    hfDivTableResultType.value = "1";
+    setDisplayState('1');
+});
+
+radioHide.addEventListener("click", () => {
+    hfFilterSearchType.value = "%%";
+    setDisplayState('none');
+});
+
+// Initializations
+setDisplayState(hfFilterSearchType.value);
+setAdditionalSearchEngineDisplay(hfControlCategory.value);
+hideAllFields();
+
+if (hfControlCategory && hfControlCategory.value && hfControlCategory.value !== "%%") {
+    const selectedValue = hfControlCategory.value;
+    const selectedCategory = CATEGORY_MAP[selectedValue];
+    showFieldsByCategory(selectedCategory);
+}
+
+if (ddlControlCategory) {
+    ddlControlCategory.addEventListener('change', function () {
+        const selectedValueDdl = this.value;
+        const selectedCategoryDdl = CATEGORY_MAP[selectedValueDdl];
+        hideAllFields();
+        hfControlCategory.value = selectedValueDdl;
+        setAdditionalSearchEngineDisplay(selectedValueDdl);
+
+        if (selectedCategoryDdl && selectedValueDdl !== "%%") {
+            showFieldsByCategory(selectedCategoryDdl);
+        }
+    });
+}
