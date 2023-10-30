@@ -1,0 +1,108 @@
+<ul>
+    <li class="Twitter">
+        <a href="https://twitter.com/flowuhhWEB" target="blank_">
+            <h3>Twitter</h3>
+            <p>Follow us on Twitter to see updates on work, events and careers.</p>
+            <i class="fa fa-twitter"></i>
+        </a>
+    </li>
+    <li class="Dribbble">
+        <a href="https://dribbble.com/flowuhh" target="blank_">
+            <h3>Dribbble</h3>
+            <p>Our Dribbble showcases off our prototype designs which you can try to build.</p>
+            <i class="fa fa-dribbble"></i>
+        </a>
+    </li>
+    <li class="GitHub">
+        <a href="https://github.com/flowuhh" target="blank_">
+            <h3>GitHub</h3>
+            <p>All of our projects can be forked and worked on through GitHub.</p>
+            <i class="fa fa-github"></i>
+        </a>
+    </li>
+</ul>
+
+@import url('https://fonts.googleapis.com/css?family=Roboto:400,900');
+
+body {
+    font-family: "Roboto", sans-serif;
+    background-color: #f2f2f2;
+    line-height: 1.2;
+}
+
+ul {
+    width: 60vw;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+@media (max-width: 840px) {
+    ul {
+        width: 80vw;
+    }
+}
+
+ul li {
+    border-bottom: 2px solid #e6e6e6;
+    position: relative;
+    overflow: hidden;
+    transition: 0.2s ease-in-out;
+}
+
+ul li a {
+    display: block;
+    padding: 30px;
+    text-decoration: none;
+    color: #222;
+    transition: 0.2s ease-in-out;
+}
+
+ul li a h3 {
+    margin: 0 0 15px;
+    font-size: 30px;
+    font-weight: 900;
+}
+
+ul li a p {
+    margin: 0;
+    font-size: 20px;
+    max-width: calc(100% - 110px);
+}
+
+ul li a i {
+    position: absolute;
+    top: 50%;
+    right: 50px;
+    transform: translatey(-50%);
+    font-size: 80px !important;
+    opacity: 0.25;
+}
+
+ul li.Twitter:hover {
+    background-color: #55acee;
+}
+
+ul li.Dribbble:hover {
+    background-color: #ea4c89;
+}
+
+ul li.GitHub:hover {
+    background-color: #333;
+}
+
+ul li:hover {
+    box-shadow: 0 10px 15px 0 #e6e6e6;
+}
+
+ul li:hover > a {
+    color: #fff;
+}
+
+ul li:first-child {
+    border-top: 2px solid #e6e6e6;
+}
