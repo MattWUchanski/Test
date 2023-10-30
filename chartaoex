@@ -1,0 +1,46 @@
+<%@ Page Language="C#" AutoEventWireup="true" CodeBehind="YourPageName.aspx.cs" Inherits="YourNamespace.YourPageName" %>
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title></title>
+</head>
+<body>
+    <form id="form1" runat="server">
+        <div id="chart1"></div>
+        <div id="chart2"></div>
+        <!-- Add more containers as required -->
+
+        <asp:ScriptManager ID="ScriptManager1" runat="server"></asp:ScriptManager>
+    </form>
+</body>
+</html>
+using System;
+using System.Collections.Generic;
+using System.Web.Script.Serialization;
+
+public partial class YourPageName : System.Web.UI.Page
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+        var chartConfigs = new List<ChartConfig>
+        {
+            new ChartConfig { ElementId = "#chart1", SeriesValue = 67, Label = "Median Ratio" },
+            new ChartConfig { ElementId = "#chart2", SeriesValue = 72, Label = "Some Other Label" }
+            //... add more as needed
+        };
+
+        string jsonConfigs = new JavaScriptSerializer().Serialize(chartConfigs);
+
+        string script = $"renderMultipleCharts({jsonConfigs});";
+        ScriptManager.RegisterStartupScript(this, this.GetType(), "ChartScript", script, true);
+    }
+
+    public class ChartConfig
+    {
+        public string ElementId { get; set; }
+        public int SeriesValue { get; set; }
+        public string Label { get; set; }
+    }
+}
