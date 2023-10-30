@@ -1,3 +1,45 @@
+function renderMultipleCharts(configs) {
+    configs.forEach(config => {
+        renderChart(config.ElementId, config.SeriesValue, config.Label);
+    });
+}
+
+function renderChart(elementId, seriesValue, label) {
+    var options = {
+        series: [seriesValue],
+        chart: {
+            height: 350,
+            type: "radialBar",
+            offsetY: -10
+        },
+        plotOptions: {
+            radialBar: {
+                dataLabels: {
+                    name: {
+                        offsetY: 20,
+                        color: "green",
+                        formatter: function () {
+                            return ["Posts", "(30 days)"];
+                        }
+                    },
+                    value: {
+                        color: "#111",
+                        offsetY: -30,
+                        fontSize: "22px"
+                    }
+                }
+            }
+        },
+        labels: [label]
+    };
+
+    var chart = new ApexCharts(document.querySelector(elementId), options);
+    chart.render();
+}
+
+string script = string.Format("renderMultipleCharts({0});", jsonConfigs);
+ScriptManager.RegisterStartupScript(this, this.GetType(), "ChartScript", script, true);
+
 <%@ Page Language="C#" AutoEventWireup="true" CodeBehind="YourPageName.aspx.cs" Inherits="YourNamespace.YourPageName" %>
 
 <!DOCTYPE html>
