@@ -1,3 +1,20 @@
+document.addEventListener("DOMContentLoaded", function() {
+    // Select all checkboxes with id starting with "pytanieBlad"
+    let checkboxes = document.querySelectorAll('input[type="checkbox"][id^="pytanieBlad"]');
+
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener("change", function() {
+            let hiddenFieldId = "hf_" + checkbox.id;
+            let hiddenField = document.getElementById(hiddenFieldId);
+            if (hiddenField) {
+                hiddenField.value = checkbox.checked ? "true" : "false";
+            }
+        });
+    });
+});
+
+
+
 <ul>
     <li class="Twitter">
         <a href="https://twitter.com/flowuhhWEB" target="blank_">
