@@ -1,4 +1,67 @@
+class VisibilityManager {
+  constructor(radioButtonsSelector, elementCategory, selectedControlSearch, prefixArray) {
+    this.radioButtons = document.querySelectorAll(radioButtonsSelector);
+    this.elementCategory = elementCategory;
+    this.selectedControlSearch = selectedControlSearch;
+    this.prefixArray = prefixArray;
+    this.initEvents();
+    this.setDefaultVisibility();
+  }
 
+  setDefaultVisibility() {
+    const selector = this.elementCategory.value;
+    const buttonSelector = this.selectedControlSearch.value;
+    if (selector) {
+      this.toggleVisibility(selector, buttonSelector);
+    }
+  }
+
+  initEvents() {
+    this.radioButtons.forEach(radioButton => {
+      radioButton.addEventListener('change', this.onRadioButtonChange.bind(this));
+    });
+  }
+
+  onRadioButtonChange(event) {
+    const radioButton = event.target;
+    this.elementCategory.value = radioButton.id !== 'Hide' ? radioButton.id : this.elementCategory.value;
+    this.selectedControlSearch.value = radioButton.id;
+
+    this.toggleVisibility(this.elementCategory.value, this.selectedControlSearch.value);
+  }
+
+  hideAll() {
+    this.prefixArray.forEach(prefix => {
+      const elements = document.querySelectorAll(`[id^='${prefix}']`);
+      elements.forEach(el => el.style.display = 'none');
+    });
+  }
+
+  showElementsByCategory(category, btnCategory) {
+    this.prefixArray.forEach(prefix => {
+      if (!(btnCategory === 'Hide' && prefix === 'divPanel')) {
+        const selector = `[id^='${prefix}${category}']`;
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(el => el.style.display = '');
+      }
+    });
+  }
+
+  toggleVisibility(selectorToShow, selectorBtnToShow) {
+    this.hideAll();
+    this.showElementsByCategory(selectorToShow, selectorBtnToShow);
+  }
+}
+
+const visibleElementsCategory = document.getElementById('ContentPlaceHolder1_hf_visibleElementsCategory');
+const selectedControlSearch = document.getElementById('ContentPlaceHolder1_hf_selectedControlSearch');
+
+const prefixes = ['divPanel', 'divResult'];
+
+const visibilityManager = new VisibilityManager('.radioButton', visibleElementsCategory, selectedControlSearch, prefixes);
+
+
+////////////////
 function selectElementsByCategory(category) {
   // Define the prefixes
   const prefixes = ['div_', 'card_', 'element_'];
