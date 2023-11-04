@@ -1,3 +1,67 @@
+
+class VisibilityManager {
+  constructor(radioButtonsSelector, elementsSelectors) {
+    this.radioButtons = document.querySelectorAll(radioButtonsSelector);
+    this.elementsSelectors = elementsSelectors;
+    this.initEvents();
+  }
+
+  initEvents() {
+    this.radioButtons.forEach(radioButton => {
+      radioButton.addEventListener('change', this.onRadioButtonChange.bind(this));
+    });
+  }
+
+  onRadioButtonChange(event) {
+    const radioButton = event.target;
+    const selector = this.elementsSelectors[radioButton.value];
+    this.toggleVisibility(selector);
+  }
+
+  hideAll() {
+    Object.values(this.elementsSelectors).forEach(selector => {
+      const elements = document.querySelectorAll(selector);
+      elements.forEach(el => el.style.display = 'none');
+    });
+  }
+
+  showElements(selector) {
+    const elements = document.querySelectorAll(selector);
+    elements.forEach(el => el.style.display = '');
+  }
+
+  toggleVisibility(selectorToShow) {
+    this.hideAll();
+    this.showElements(selectorToShow);
+  }
+}
+
+// Usage
+document.addEventListener('DOMContentLoaded', () => {
+  const visibilityManager = new VisibilityManager('.my-radio', {
+    'radio1': '#panel1, #gridview1',
+    'radio2': '#panel2, #gridview2',
+    'radio3': '#panel3, #gridview3'
+  });
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+///////////////////////////////////////////////////////////
+
+
 document.addEventListener("DOMContentLoaded", function() {
     // Select all checkboxes with id starting with "pytanieBlad"
     let checkboxes = document.querySelectorAll('input[type="checkbox"][id^="pytanieBlad"]');
