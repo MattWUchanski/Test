@@ -1,4 +1,32 @@
 
+function selectElementsByCategory(category) {
+  // Define the prefixes
+  const prefixes = ['div_', 'card_', 'element_'];
+
+  // Initialize an array to hold all matched elements
+  const elements = [];
+
+  // Loop through each prefix and select elements with the matching ID
+  prefixes.forEach(prefix => {
+    // Use the attribute selector to find elements with an ID that starts with the prefix and category name
+    const selector = `[id^=${prefix}${category}]`;
+    const foundElements = document.querySelectorAll(selector);
+
+    // Add found elements to the elements array
+    foundElements.forEach(el => elements.push(el));
+  });
+
+  return elements;
+}
+
+// Example usage:
+const waterElements = selectElementsByCategory('water');
+console.log(waterElements);
+
+const sunElements = selectElementsByCategory('sun');
+console.log(sunElements);
+
+
 class VisibilityManager {
   constructor(radioButtonsSelector, elementsSelectors) {
     this.radioButtons = document.querySelectorAll(radioButtonsSelector);
