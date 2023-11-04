@@ -1,3 +1,57 @@
+
+class VisibilityManager {
+  constructor(radioButtonsSelector, elementCategory, selectedControlSearch, prefixArray) {
+    this.radioButtons = document.querySelectorAll(radioButtonsSelector);
+    this._elementCategory = elementCategory;
+    this._selectedControlSearch = selectedControlSearch;
+    this.prefixArray = prefixArray;
+    this.initEvents();
+    this.setDefaultVisibility();
+  }
+
+  getValue(element) {
+    return element.value;
+  }
+
+  setValue(element, value) {
+    element.value = value;
+  }
+
+  setDefaultVisibility() {
+    const category = this.getValue(this._elementCategory);
+    if (category) {
+      this.toggleVisibility(category, this.getValue(this._selectedControlSearch));
+    }
+  }
+
+  initEvents() {
+    this.radioButtons.forEach(radioButton => {
+      radioButton.addEventListener('change', (event) => this.onRadioButtonChange(event));
+    });
+  }
+
+  onRadioButtonChange(event) {
+    const radioButton = event.target;
+    this.setValue(
+      this._elementCategory,
+      radioButton.id !== 'Hide' ? radioButton.id : this.getValue(this._elementCategory)
+    );
+    this.setValue(this._selectedControlSearch, radioButton.id);
+
+    this.toggleVisibility(
+      this.getValue(this._elementCategory),
+      this.getValue(this._selectedControlSearch)
+    );
+  }
+
+  // ... rest of the methods remain unchanged ...
+}
+
+// Usage remains unchanged ...
+
+
+
+////////////////////////////
 class VisibilityManager {
   constructor(radioButtonsSelector, elementCategory, selectedControlSearch, prefixArray) {
     this.radioButtons = document.querySelectorAll(radioButtonsSelector);
