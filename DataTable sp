@@ -1,3 +1,52 @@
+
+
+private void ProcessDropdownElementsField(IEnumerable<ElementsField> elementsFields, 
+                                          DataTable cardSubDetailsTable, 
+                                          Func<DataRow, bool> idElementPredicate,
+                                          MapperOptions mapperDropdownOptions)
+{
+    foreach (ElementsField elementField in elementsFields)
+    {
+        if (elementField.RodzajPola == "dropdown")
+        {
+            elementField.ElementSubElementsField = GetMappedRowsElementSubElementsField(
+                cardSubDetailsTable,
+                idElementPredicate,
+                mapperDropdownOptions);
+
+            if (elementField.CorrespondingValue.ToString() != "Nie dotyczy")
+            {
+                CreateHtmlElements(
+                    elementField.RodzajPola,
+                    elementField.FiledyMozliwe,
+                    elementField.NazwaTechnicznaPola,
+                    elementField.CorrespondingValue,
+                    elementField.NazwaPola,
+                    elementField.IdPlaceholder,
+                    elementField.ElementSubElementsField);
+            }
+        }
+    }
+}
+
+// Usage for the first collection of ElementsField objects
+ProcessDropdownElementsField(elementsField, 
+                             cardSubDetailsTable, 
+                             row => Convert.ToInt32(row["IdElementu"]) == elementField.IdElementu, 
+                             mapperDropdownOptions);
+
+// Usage for the second collection of ElementsField objects for reinspection
+ProcessDropdownElementsField(elementsFieldReinspection, 
+                             cardSubDetailsTable, 
+                             row => Convert.ToInt32(row["IdElementu"]) == reinspection.IdElementu, 
+                             mapperDropdownOptions);
+
+
+
+
+
+////////////////////////////////////////////////////////////////////////
+
 public SqlDbType ConvertToSqlDbType(Type type)
 {
     if (type == typeof(int)) return SqlDbType.Int;
