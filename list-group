@@ -1,4 +1,42 @@
+class FieldSynchronizer {
+  constructor() {
+    this.bindEvents();
+  }
 
+  bindEvents() {
+    // Bind to DropDownList changes
+    document.querySelectorAll('[id$=DropDownList]').forEach(ddl => {
+      ddl.addEventListener('change', this.updateHiddenField.bind(this));
+    });
+
+    // Bind to TextBox inputs
+    document.querySelectorAll('[id$=TextBox]').forEach(textBox => {
+      textBox.addEventListener('input', this.updateHiddenField.bind(this));
+    });
+
+    // Other specific controls can be added similarly
+  }
+
+  updateHiddenField(event) {
+    const control = event.target;
+    const hiddenFieldId = control.id.replace('DropDownList', 'HiddenField').replace('TextBox', 'HiddenField');
+    const hiddenField = document.getElementById(hiddenFieldId);
+
+    if (hiddenField) {
+      hiddenField.value = control.value;
+    } else {
+      console.warn(`Hidden field with id '${hiddenFieldId}' not found.`);
+    }
+  }
+
+  // Future methods can be added here to extend functionality
+}
+
+// Instantiate the class
+const synchronizer = new FieldSynchronizer();
+
+
+//////////////////////////////////////
 class VisibilityManager {
   constructor(radioButtonsSelector, elementCategory, selectedControlSearch, prefixArray) {
     this.radioButtons = document.querySelectorAll(radioButtonsSelector);
