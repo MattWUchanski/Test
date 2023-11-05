@@ -1,3 +1,82 @@
+
+class GridViewManager {
+  constructor(gridViewId, spinnerId, hiddenFieldId) {
+    this.gridViewId = gridViewId;
+    this.spinnerId = spinnerId;
+    this.hiddenFieldId = hiddenFieldId;
+    this.bindEvents();
+  }
+
+  bindEvents() {
+    // Bind to all DropDownList changes that affect the GridView
+    document.querySelectorAll('[id*=DropDownList]').forEach(ddl => {
+      ddl.addEventListener('change', (event) => {
+        this.updateHiddenField('in progress');
+        this.toggleSpinner(true);
+        __doPostBack(event.target.id, ''); // Cause postback to refresh data
+      });
+    });
+  }
+
+  updateHiddenField(value) {
+    const hiddenField = document.getElementById(this.hiddenFieldId);
+    if (hiddenField) {
+      hiddenField.value = value;
+    } else {
+      console.warn(`Hidden field with id '${this.hiddenFieldId}' not found.`);
+    }
+  }
+
+  toggleSpinner(show) {
+    const spinner = document.getElementById(this.spinnerId);
+    const gridView = document.getElementById(this.gridViewId);
+
+    if (spinner) {
+      spinner.style.display = show ? 'block' : 'none';
+    }
+    if (gridView) {
+      gridView.style.visibility = show ? 'hidden' : 'visible';
+    }
+  }
+
+  // This method should be called after the server-side operation completes
+  operationComplete() {
+    this.updateHiddenField('done');
+    this.toggleSpinner(false);
+  }
+}
+
+// Instantiate the class with the IDs of your GridView, Spinner, and HiddenField
+const gridViewManager = new GridViewManager('GridViewOrders', 'SpinnerOrders', 'HiddenFieldOrdersStatus');
+
+
+protected void DropDownList_SelectedIndexChanged(object sender, EventArgs e)
+{
+    // Your data loading logic for the GridView...
+
+    // After loading data, call the operationComplete method to hide the spinner
+    string script = "gridViewManager.operationComplete();";
+    ClientScript.RegisterStartupScript(this.GetType(), "HideSpinner", script, true);
+}
+
+<asp:DropDownList ID="DropDownListCustomer" runat="server" AutoPostBack="True" 
+    OnSelectedIndexChanged="DropDownListCustomer_SelectedIndexChanged">
+    <!-- Populate with ListItem elements here -->
+</asp:DropDownList>
+
+<asp:HiddenField ID="HiddenFieldOrdersStatus" runat="server" />
+
+<!-- Presumably, you also have a SpinnerOrders element in your markup that you want to show/hide -->
+<div id="SpinnerOrders" style="display:none;">
+    <!-- Your spinner HTML here -->
+</div>
+
+<asp:GridView ID="GridViewOrders" runat="server">
+    <!-- Columns and other setup here -->
+</asp:GridView>
+
+
+//////////////////////////
 class FieldSynchronizer {
   constructor() {
     this.bindEvents();
