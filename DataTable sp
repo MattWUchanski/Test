@@ -1,3 +1,50 @@
+public class ViewStateManager
+{
+    // Assuming ViewState is a property of type StateBag or similar
+    private StateBag ViewState;
+
+    public ViewStateManager(StateBag viewState)
+    {
+        ViewState = viewState;
+    }
+
+    // Generic method to get data of any type from ViewState
+    public T Get<T>(string key) where T : class
+    {
+        return ViewState[key] as T;
+    }
+
+    // Method to set data of any type into ViewState
+    public void Set<T>(string key, T value) where T : class
+    {
+        ViewState[key] = value;
+    }
+
+    // Method to check if the ViewState contains a specific key
+    public bool ContainsKey(string key)
+    {
+        return ViewState.ContainsKey(key);
+    }
+
+    // Method to remove an item from ViewState
+    public void Remove(string key)
+    {
+        if (ViewState.ContainsKey(key))
+        {
+            ViewState.Remove(key);
+        }
+    }
+
+    // Example specific method (e.g., for PageConfig)
+    public PageConfig GetPageConfig()
+    {
+        return Get<PageConfig>("PageConfig");
+    }
+
+    // Add more specific methods as needed...
+}
+
+/////////////////////////////////////////////////////
 
 
 private void ProcessDropdownElementsField(IEnumerable<ElementsField> elementsFields, 
