@@ -1,0 +1,81 @@
+using System;
+using System.Collections.Generic;
+using System.Data;
+using System.Web.UI.WebControls;
+
+public class GridViewDataManager
+{
+    private Dictionary<string, Func<object[]>> parameterExtractors;
+    private Dictionary<string, Func<object[], DataTable>> dataRetrievers;
+    private Dictionary<GridView, DataTable> gridViewDict;
+
+    public GridViewDataManager()
+    {
+        parameterExtractors = new Dictionary<string, Func<object[]>>()
+        {
+            { "GridView2", () => ExtractParametersForGridView2() }
+            // Add other mappings here
+        };
+
+        dataRetrievers = new Dictionary<string, Func<object[], DataTable>>()
+        {
+            { "GridView2", args => GetDataForGridView2((int)args[0], (string)args[1], (bool)args[2]) }
+            // Add other mappings here
+        };
+
+        gridViewDict = CreateGridViews();
+    }
+
+    private Dictionary<GridView, DataTable> CreateGridViews()
+    {
+        // Initialize your GridView controls here
+        var gridViewDict = new Dictionary<GridView, DataTable>();
+        gridViewDict.Add(new GridView { ID = "GridView1" }, null);
+        gridViewDict.Add(new GridView { ID = "GridView2" }, null);
+        // Configure each GridView as needed
+        return gridViewDict;
+    }
+
+    // ... (Other methods remain the same)
+
+    public void BindDataToGridViews(string gridViewKey)
+    {
+        if (!string.IsNullOrEmpty(gridViewKey) && dataRetrievers.ContainsKey(gridViewKey))
+        {
+            var parameters = parameterExtractors.ContainsKey(gridViewKey) ? parameterExtractors[gridViewKey]() : null;
+            var dataTable = dataRetrievers[gridViewKey](parameters);
+
+            foreach (var gridView in gridViewDict.Keys)
+            {
+                if (gridView.ID == gridViewKey)
+                {
+                    gridViewDict[gridView] = dataTable;
+                    gridView.DataSource = dataTable;
+                    gridView.DataBind();
+                    break;
+                }
+            }
+        }
+        else
+        {
+            // Populate all grid views
+            foreach (var gridView in gridViewDict.Keys)
+            {
+                var key = gridView.ID;
+                if (dataRetrievers.ContainsKey(key))
+                {
+                    var parameters = parameterExtractors.ContainsKey(key) ? parameterExtractors[key]() : null;
+                    var dataTable = dataRetrievers[key](parameters);
+                    gridViewDict[gridView] = dataTable;
+                    gridView.DataSource = dataTable;
+                    gridView.DataBind();
+                }
+            }
+        }
+    }
+
+    public Dictionary<GridView, DataTable> GetGridViews()
+    {
+        return gridViewDict;
+    }
+}
