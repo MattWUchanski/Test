@@ -1,3 +1,38 @@
+public static List<T> ConvertToList<T>(DataTable dataTable) where T : new()
+{
+    List<T> list = new List<T>();
+
+    foreach (DataRow row in dataTable.Rows)
+    {
+        T obj = new T();
+        foreach (DataColumn column in dataTable.Columns)
+        {
+            PropertyInfo prop = typeof(T).GetProperty(column.ColumnName);
+            if (prop != null)
+            {
+                if (row[column] == DBNull.Value)
+                {
+                    // If the value is DBNull, set the property to null (for nullable types)
+                    if (Nullable.GetUnderlyingType(prop.PropertyType) != null)
+                    {
+                        prop.SetValue(obj, null, null);
+                    }
+                }
+                else
+                {
+                    // If the value is not DBNull, convert it to the proper type
+                    Type propType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
+                    object safeValue = Convert.ChangeType(row[column], propType);
+                    prop.SetValue(obj, safeValue, null);
+                }
+            }
+        }
+        list.Add(obj);
+    }
+
+    return list;
+}
+
 public class ViewStateManager
 {
     // Assuming ViewState is a property of type StateBag or similar
