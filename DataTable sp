@@ -1,3 +1,32 @@
+
+public DataSet CallSpForDs(string storedProcedureName, Dictionary<string, object> sqlParameters)
+{
+    var parameters = _parameterManager.GetParameters(storedProcedureName, sqlParameters);
+
+    using (SqlConnection conn = new SqlConnection(_connectionString))
+    {
+        using (SqlCommand cmd = new SqlCommand(storedProcedureName, conn))
+        {
+            cmd.CommandType = CommandType.StoredProcedure;
+
+            foreach (var parameter in parameters)
+            {
+                cmd.Parameters.Add(parameter);
+            }
+
+            using (SqlDataAdapter adapter = new SqlDataAdapter(cmd))
+            {
+                DataSet dataSet = new DataSet();
+                adapter.Fill(dataSet);
+                return dataSet;
+            }
+        }
+    }
+}
+
+
+/////////////////////////
+
 public static List<T> ConvertToList<T>(DataTable dataTable) where T : new()
 {
     List<T> list = new List<T>();
